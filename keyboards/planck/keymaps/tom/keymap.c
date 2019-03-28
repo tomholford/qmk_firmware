@@ -93,7 +93,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Adjust (Lower + Raise)
  * ,-----------------------------------------------------------------------------------.
- * |      | Reset|      |      |      |      |      |      |      |      |      |  Del |
+ * |screen| Reset|      |      |      |      |      |      |      |      |      |  Del |
  * |------+------+------+------+------+-------------+------+------+------+------+------|
  * |      |      |      |Aud on|Audoff|AGnorm|AGswap|Qwerty|      |      |      |      |
  * |------+------+------+------+------+------|------+------+------+------+------+------|
@@ -126,6 +126,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         print("mode just switched to qwerty and this is a huge string\n");
         set_single_persistent_default_layer(_QWERTY);
+      }
+      return false;
+      break;
+    case BACKLIT:
+      if (record->event.pressed) {
+        register_code(KC_RSFT);
+        #ifdef BACKLIGHT_ENABLE
+          backlight_step();
+        #endif
+        #ifdef KEYBOARD_planck_rev5
+          PORTE &= ~(1<<6);
+        #endif
+      } else {
+        unregister_code(KC_RSFT);
+        #ifdef KEYBOARD_planck_rev5
+          PORTE |= (1<<6);
+        #endif
       }
       return false;
       break;
@@ -254,6 +271,9 @@ void rgb_matrix_indicators_user(void) {
       for (int i = 0; i < DRIVER_LED_TOTAL; i++) {
         rgb_matrix_set_color(i, 0xFF, 0x99, 0x00);
       }
+      // set Screenshot to Blue
+      rgb_matrix_set_color(0, 0x00, 0x00, 0xFF);
+      // set DEBUG to Red
       rgb_matrix_set_color(1, 0xFF, 0x00, 0x00);
       break;
 
